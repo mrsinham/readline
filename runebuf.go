@@ -157,6 +157,16 @@ func (r *RuneBuffer) WriteRune(s rune) {
 }
 
 func (r *RuneBuffer) WriteRunes(s []rune) {
+	if r.idx == len(r.buf) {
+		var buf bytes.Buffer
+		for i := range s {
+			buf.WriteRune(s[i])
+			r.buf = append(r.buf, s[i])
+		}
+		r.w.Write(buf.Bytes())
+		r.idx += len(s)
+		return
+	}
 	r.Refresh(func() {
 		tail := append(s, r.buf[r.idx:]...)
 		r.buf = append(r.buf[:r.idx], tail...)

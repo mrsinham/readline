@@ -347,11 +347,21 @@ func (r *RuneBuffer) BackEscapeWord() {
 }
 
 func (r *RuneBuffer) Backspace() {
-	r.Refresh(func() {
-		if r.idx == 0 {
-			return
-		}
 
+	if r.idx == 0 {
+		return
+	}
+
+	// we are at the end of the line
+	if r.idx == len(r.buf) {
+		r.idx--
+		r.buf = r.buf[:len(r.buf)-1]
+		r.w.Write([]byte("\b \b"))
+		return
+	}
+
+	// or in the middle
+	r.Refresh(func() {
 		r.idx--
 		r.buf = append(r.buf[:r.idx], r.buf[r.idx+1:]...)
 	})

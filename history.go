@@ -21,6 +21,7 @@ func (h *hisItem) Clean() {
 }
 
 type opHistory struct {
+	sync.Mutex
 	cfg        *Config
 	history    *list.List
 	historyVer int64
@@ -227,12 +228,16 @@ func (o *opHistory) Next() ([]rune, bool) {
 
 // Disable the current history
 func (o *opHistory) Disable() {
+	o.Lock()
 	o.enable = false
+	o.Unlock()
 }
 
 // Enable the current history
 func (o *opHistory) Enable() {
+	o.Lock()
 	o.enable = true
+	o.Unlock()
 }
 
 func (o *opHistory) debug() {
@@ -246,9 +251,12 @@ func (o *opHistory) debug() {
 func (o *opHistory) New(current []rune) (err error) {
 
 	// history deactivated
+	o.Lock()
 	if !o.enable {
+		o.Unlock()
 		return nil
 	}
+	o.Unlock()
 
 	current = runes.Copy(current)
 
